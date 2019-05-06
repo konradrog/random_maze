@@ -1,3 +1,4 @@
+// Phaser 2.12.0
 const config = {
   type: Phaser.AUTO,
   width: 640,
