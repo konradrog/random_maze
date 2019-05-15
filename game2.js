@@ -7,16 +7,20 @@ function preload() {
     game.load.image('ground_1x1', 'assets/ground_1x1.png');
     game.load.image('walls_1x2', 'assets/walls_1x2.png');
     game.load.image('tiles2', 'assets/tiles2.png');
-    game.load.image('ship', 'assets/thrust_ship2.png');
+    game.load.image('mainCharacter', 'assets/thrust_ship2.png');
+    game.load.image('bullet', 'assets/thrust_ship3.png');
 
 }
 
-var ship;
+var mainCharacter;
 var map;
 var layer;
 var cursors;
+var weapon;
 
 function create() {
+
+
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -30,7 +34,7 @@ function create() {
 
     layer = map.createLayer('Tile Layer 1');
 
-    layer.resizeWorld();
+    // layer.resizeWorld();
 
     //  Set the tiles for collision.
     //  Do this BEFORE generating the p2 bodies below.
@@ -41,10 +45,18 @@ function create() {
     //  required. There is also a parameter to control optimising the map build.
     game.physics.p2.convertTilemap(map, layer);
 
-    ship = game.add.sprite(200, 200, 'ship');
-    game.physics.p2.enable(ship);
+    mainCharacter = game.add.sprite(200, 200, 'mainCharacter');
 
-    game.camera.follow(ship);
+    weapon = game.add.weapon(30, 'bullet');
+    weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+    weapon.bulletSpeed = 100;
+    weapon.fireRate = 100;
+
+    weapon.trackSprite(mainCharacter, 0, 0);
+
+    game.physics.p2.enable(mainCharacter);
+
+    game.camera.follow(mainCharacter);
 
     //  By default the ship will collide with the World bounds,
     //  however because you have changed the size of the world (via layer.resizeWorld) to match the tilemap
@@ -58,32 +70,51 @@ function create() {
     // ship.body.collideWorldBounds = false;
 
     cursors = game.input.keyboard.createCursorKeys();
+    weapon_directions = game.input.keyboard.addKeys({ 'up': Phaser.KeyCode.W, 'down': Phaser.KeyCode.S, 'left': Phaser.KeyCode.A, 'right': Phaser.KeyCode.D });
 
 }
 
 function update() {
 
-    if (cursors.left.isDown)
-    {
-        ship.body.rotateLeft(100);
-    }
-    else if (cursors.right.isDown)
-    {
-        ship.body.rotateRight(100);
-    }
-    else
-    {
-        ship.body.setZeroRotation();
-    }
+  mainCharacter.body.setZeroVelocity();
 
-    if (cursors.up.isDown)
-    {
-        ship.body.thrust(400);
-    }
-    else if (cursors.down.isDown)
-    {
-        ship.body.reverse(400);
-    }
+  if (cursors.left.isDown)
+  {
+  mainCharacter.body.moveLeft(200);
+  }
+  else if (cursors.right.isDown)
+  {
+  mainCharacter.body.moveRight(200);
+  }
+
+  if (cursors.up.isDown)
+  {
+    mainCharacter.body.moveUp(200);
+  }
+  else if (cursors.down.isDown)
+  {
+    mainCharacter.body.moveDown(200);
+  }
+
+  if (weapon_directions.up.isDown) {
+    weapon.fireAngle = 270;
+    weapon.fire();
+  }
+
+  if (weapon_directions.down.isDown) {
+    weapon.fireAngle = 90;
+    weapon.fire();
+  }
+
+  if (weapon_directions.left.isDown) {
+    weapon.fireAngle = 180;
+    weapon.fire();
+  }
+
+  if (weapon_directions.right.isDown) {
+    weapon.fireAngle = 0;
+    weapon.fire();
+  }
 
 }
 
